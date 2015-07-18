@@ -1,16 +1,22 @@
 <template name="go">
-	<div>Game: {{gameId}}</div>
-	<div>You are {{me}} ({{myColor}})</div>
+	<div class="row">
+		<div class="col-md-9">
+			<div id="board"></div>
+		</div>
 
-	{{#if myOpponent}}
-		<div>Your opponent is {{myOpponent}}</div>
-		<div>Turn: {{turn}}</div>
-		<div>Captured pieces: {{captureCountBlack}} black / {{captureCountWhite}} white</div>
-	{{else}}
-		<div>Waiting for opponent...</div>
-	{{/if}}
+		<div class="col-md-3">
+			<div>Game: {{gameId}}</div>
+			<div>You are {{me}} ({{myColor}})</div>
 
-	<button id="clear">Clear</button>
+			{{#if myOpponent}}
+				<div>Your opponent is {{myOpponent}}</div>
+				<div>Turn: {{turn}}</div>
+				<div>Captured pieces: {{captureCountBlack}} black / {{captureCountWhite}} white</div>
+			{{else}}
+				<div>Waiting for opponent...</div>
+			{{/if}}
 
-	<div id="board"></div>
+			<button id="clear">Clear</button>
+		</div>
+	</div>
 </template>

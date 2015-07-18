@@ -94,9 +94,14 @@ Template.go.rendered = function() {
 
   WGo.Board.default.background = "/wgo/wood1.jpg";
 
-  var board = new WGo.Board(document.getElementById("board"), {
-    width: 600,
-  });
+  var board_element = document.getElementById("board")
+  var board = new WGo.Board(board_element);
+
+  var resizeBoard = function() {
+    board.setWidth(Math.min(board_element.offsetWidth, window.innerHeight));
+  };
+  resizeBoard();
+  window.addEventListener("resize", resizeBoard);
 
 
   board.addEventListener("click", function(x, y) {
