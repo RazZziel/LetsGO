@@ -11,94 +11,108 @@ var getGame = function() {
 };
 
 var updateGameInSession = function(game) {
-  Session.set("turnColor", game.turn);
-  Session.set("turnNumber", game.stack.length);
-  Session.set("captureCountBlack", game.getCaptureCount(WGo.B));
-  Session.set("captureCountWhite", game.getCaptureCount(WGo.W));
+    Session.set("turnColor", game.turn);
+    Session.set("turnNumber", game.stack ? game.stack.length : 0);
+    Session.set("captureCountBlack", game.getCaptureCount(WGo.B));
+    Session.set("captureCountWhite", game.getCaptureCount(WGo.W));
 }
 
 var invalidMoveReason2str = function(reason) {
-  switch (reason) {
-    case 1: return "Given coordinates are not on board";
-    case 2: return "On given coordinates already is a stone";
-    case 3: return "Suicide";
-    case 4: return "Repeated position";
-    default: return "Unknown ("+reason+")";
-  }
+    switch (reason) {
+        case 1: return "Given coordinates are not on board";
+        case 2: return "On given coordinates already is a stone";
+        case 3: return "Suicide";
+        case 4: return "Repeated position";
+        default: return "Unknown ("+reason+")";
+    }
 }
 
+
+
+
 var myColor = function() {
-  if (!Session.get("game"))
-    return undefined;
+    if (!Session.get("game"))
+        return undefined;
 
-  if (Meteor.userId() == Session.get("game").p1)
-      return WGo.B;
+    if (Meteor.userId() == Session.get("game").p1)
+        return WGo.B;
     else
-      return WGo.W;
+        return WGo.W;
 };
-
-
-
 var game = new WGo.Game(19);
 updateGameInSession(game);
 
 
 Template.go.events({
-  'click #clear': function (e) {
-    Meteor.call("clear");
-    game = new WGo.Game(19);
+    'click #clear': function (e) {
+        Meteor.call("clear");
+        game = new WGo.Game(19);
+        updateGameInSession(game);
+    }
     getGame();
-    updateGameInSession(game);
-  }
 });
 
 Template.go.helpers({
-  "turn" : function() {
-    return Session.get("turnNumber") + " (" + (Session.get("turnColor") == WGo.B ? "Black" : "White") + ")";
-  },
+    "turn" : function() {
+        return Session.get("turnNumber") + " (" + (Session.get("turnColor") == WGo.B ? "Black" : "White") + ")";
+    },
 
-  "gameId" : function() {
-    if (Session.get("game")) {
-      return Session.get("game")._id;
+    "gameId" : function() {
+        if (Session.get("game")) {
+            return Session.get("game")._id;
+        }
+    },
+
+    "me" : function() {
+        return Meteor.userId();
+    },
+
+    "myOpponent" : function() {
+        if (Session.get("game")) {
+            if (Meteor.userId() == Session.get("game").p1)
+                return Session.get("game").p2;
+            else
+                return Session.get("game").p1;
+        }
+    },
+
+    "myColor" : function() {
+        return myColor() == WGo.B ? "Black" : "White";
+    },
+
+    "captureCountBlack": function() {
+        return Session.get("captureCountWhite");
+    },
+    "captureCountWhite": function() {
+        return Session.get("captureCountBlack");
     }
-  },
-
-  "me" : function() {
-    return Meteor.userId();
-  },
-
-  "myOpponent" : function() {
-    if (Session.get("game")) {
-      if (Meteor.userId() == Session.get("game").p1)
-        return Session.get("game").p2;
-      else
-        return Session.get("game").p1;
-    }
-  },
-
-  "myColor" : function() {
-    return myColor() == WGo.B ? "Black" : "White";
-  },
-
-  "captureCountBlack": function() {
-    return Session.get("captureCountWhite");
-  },
-  "captureCountWhite": function() {
-    return Session.get("captureCountBlack");
-  }
 })
 
 Template.go.rendered = function() {
 
-  getGame();
+    Games.find({}).observe({
+
+      changed: function(newDocument, oldDocument) {
+
+          Session.set("game", newDocument);
+
+          /* TODO: Gotta be careful with this */
+          game = new WGo.Game(19);
+          updateGameInSession(game);
+      }
+
+  });
+}
+
+Template.board.rendered = function() {
 
   WGo.Board.default.background = "/wgo/wood1.jpg";
 
-  var board_element = document.getElementById("board")
+  var board_element = document.getElementById("board");
   var board = new WGo.Board(board_element);
 
   var resizeBoard = function() {
-    board.setWidth(Math.min(board_element.offsetWidth, window.innerHeight));
+      board.setWidth(Math.min(board_element.offsetWidth, window.innerHeight));
   };
   resizeBoard();
   window.addEventListener("resize", resizeBoard);
@@ -106,15 +120,15 @@ Template.go.rendered = function() {
 
   board.addEventListener("click", function(x, y) {
 
-    var turn = game.turn;
+      var turn = game.turn;
 
-    if (turn != myColor()) {
-      alert("Hold yer tits");
-      return;
-    }
+      if (turn != myColor()) {
+          alert("Calm yer tits");
+          return;
+      }
 
-    var noplay = true;
-    var ret = game.play( x, y, turn, noplay );
+      var noplay = true;
+      var ret = game.play( x, y, turn, noplay );
 
     if (ret === false) {
 
@@ -132,7 +146,7 @@ Template.go.rendered = function() {
 
   Moves.find({}).observe({
 
-    added: function(move) {
+      added: function(move) {
 
       var ret = game.play( move.x, move.y, move.turn );
 
