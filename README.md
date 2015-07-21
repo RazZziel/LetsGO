@@ -17,3 +17,10 @@
 * System finds an opponent with a matching strength
  * Optinally, if strengts are close but not equal, it'd be cool to compensate with automatically calculated handicaps
 * After the match, strengths are recalculated
+
+# Props
+
+This project was built on the shoulders of several giants:
+
+* **Meteor**: https://www.meteor.com/
+* **WGo.js**: http://wgo.waltheri.net/
