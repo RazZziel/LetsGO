@@ -105,69 +105,69 @@ Template.go.rendered = function() {
 
 Template.board.rendered = function() {
 
-  WGo.Board.default.background = "/wgo/wood1.jpg";
+    WGo.Board.default.background = "/wgo/wood1.jpg";
 
-  var board_element = document.getElementById("board");
-  var board = new WGo.Board(board_element);
+    var board_element = document.getElementById("board");
+    var board = new WGo.Board(board_element);
 
-  var resizeBoard = function() {
-      board.setWidth(Math.min(board_element.offsetWidth, window.innerHeight));
-  };
-  resizeBoard();
-  window.addEventListener("resize", resizeBoard);
-
-
-  board.addEventListener("click", function(x, y) {
-
-      var turn = game.turn;
-
-      if (turn != myColor()) {
-          alert("Calm yer tits");
-          return;
-      }
-
-      var noplay = true;
-      var ret = game.play( x, y, turn, noplay );
-      console.log("Local move: (%s, %s, %s) -> %s", x, y, turn, ret);
-
-      if (ret === false) {
-          Meteor.call("play", Session.get("game")._id, x, y, turn);
-      } else {
-          alert("Invalid movement: " + invalidMoveReason2str(ret));
-      }
-  });
+    var resizeBoard = function() {
+        board.setWidth(Math.min(board_element.offsetWidth, window.innerHeight));
+    };
+    resizeBoard();
+    window.addEventListener("resize", resizeBoard);
 
 
-  Moves.find({}).observe({
+    board.addEventListener("click", function(x, y) {
 
-      added: function(move) {
+        var turn = game.turn;
 
-          if (lastMoveId == move._id) {
-              console.warn("Ignoring repeated remote move (%s, %s, %s)", move.x, move.y, move.turn);
-              return;
-          }
-          lastMoveId = move._id;
+        if (turn != myColor()) {
+            alert("Calm yer tits");
+            return;
+        }
 
-          var ret = game.play( move.x, move.y, move.turn );
-          console.log("Remote move: (%s, %s, %s) -> %s", move.x, move.y, move.turn, ret);
+        var noplay = true;
+        var ret = game.play( x, y, turn, noplay );
+        console.log("Local move: (%s, %s, %s) -> %s", x, y, turn, ret);
 
-          if (ret.constructor == Array) {
+        if (ret === false) {
+            Meteor.call("play", Session.get("game")._id, x, y, turn);
+        } else {
+            alert("Invalid movement: " + invalidMoveReason2str(ret));
+        }
+    });
 
-              board.update({
-                  add: [ { x: move.x, y: move.y, c: move.turn } ],
-                  remove: ret
-              });
 
-          } else {
-              alert("Received invalid movement from server:" + invalidMoveReason2str(ret));
-          }
+    Moves.find({}).observe({
 
-          updateGameInSession(game);
-      },
+        added: function(move) {
 
-      removed: function(move) {
-          board.removeObject( { x: move.x, y: move.y, c: move.turn } );
-      }
+            if (lastMoveId == move._id) {
+                console.warn("Ignoring repeated remote move (%s, %s, %s)", move.x, move.y, move.turn);
+                return;
+            }
+            lastMoveId = move._id;
 
-  });
+            var ret = game.play( move.x, move.y, move.turn );
+            console.log("Remote move: (%s, %s, %s) -> %s", move.x, move.y, move.turn, ret);
+
+            if (ret.constructor == Array) {
+
+                board.update({
+                    add: [ { x: move.x, y: move.y, c: move.turn } ],
+                    remove: ret
+                });
+
+            } else {
+                alert("Received invalid movement from server:" + invalidMoveReason2str(ret));
+            }
+
+            updateGameInSession(game);
+        },
+
+        removed: function(move) {
+            board.removeObject( { x: move.x, y: move.y, c: move.turn } );
+        }
+
+    });
 }
