@@ -73,7 +73,10 @@ Template.go.helpers({
     },
 
     "myColor" : function() {
-        return myColor() == WGo.B ? "Black" : "White";
+        var color = myColor();
+        if (color) {
+          return color == WGo.B ? "Black" : "White";
+        }
     },
 
     "captureCountBlack": function() {
