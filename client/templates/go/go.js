@@ -108,10 +108,13 @@ Template.board.rendered = function() {
     WGo.Board.default.background = "/wgo/wood1.jpg";
 
     var board_element = document.getElementById("board");
+    var board_overlay = document.getElementById("boardOverlay");
     var board = new WGo.Board(board_element);
 
     var resizeBoard = function() {
         board.setWidth(Math.min(board_element.offsetWidth, window.innerHeight));
+        board_overlay.style.width = board.width+"px";
+        board_overlay.style.height = board.height+"px";
     };
     resizeBoard();
     window.addEventListener("resize", resizeBoard);

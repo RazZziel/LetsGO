@@ -1,20 +1,22 @@
 <template name="go">
 	<div class="row">
 		<div class="col-md-9">
-			{{>board}}
+			<div style="position:relative;">
+				{{>board}}
 
-			{{#if myOpponent}}
-			{{else}}
-				<div class="overlay">
-					<div class="vcenter">
-						<h1>Game created</h1>
-						<div>Waiting for an opponent...</div>
-						<div><i>(insert small cute waiting thingie here)</i></div>
-						<br/>
-						<div>Share this link with a friend: <b><a href="{{gameUrl}}">{{gameUrl}}</a></b></div>
+				{{#if myOpponent}}
+				{{else}}
+					<div class="overlay" id="boardOverlay">
+						<div class="message">
+							<h1>Game created</h1>
+							<div>Waiting for an opponent...</div>
+							<div><i>(insert small cute waiting thingie here)</i></div>
+							<br/>
+							<div>Share this link with a friend: <b><a href="{{gameUrl}}">{{gameUrl}}</a></b></div>
+						</div>
 					</div>
-				</div>
-			{{/if}}
+				{{/if}}
+			</div>
 		</div>
 
 		<div class="col-md-3">
