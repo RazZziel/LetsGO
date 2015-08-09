@@ -33,13 +33,53 @@ var myColor = function() {
         return WGo.W;
 };
 
+var addMove = function(type, x, y) {
+
+    var turn = game.turn;
+
+    if (turn != myColor()) {
+        alert("Calm yer tits");
+        return;
+    }
+
+    switch (type) {
+        case "play":
+            var noplay = true;
+            var ret = game.play( x, y, turn, noplay );
+            console.log("Local move: (%s, %s, %s) -> %s", x, y, turn, ret);
+
+            if (ret === false) {
+                Meteor.call("play", Session.get("game")._id, x, y, turn);
+            } else {
+                alert("Invalid movement: " + invalidMoveReason2str(ret));
+            }
+            break;
+
+        case "pass":
+            Meteor.call("pass", Session.get("game")._id, turn);
+            break;
+
+        case "resign":
+            Meteor.call("resign", Session.get("game")._id, turn);
+            break;
+    }
+}
+
 
 Template.go.events({
     'click #clear': function (e) {
         Meteor.call("clear");
         game = new WGo.Game(19);
         updateGameInSession(game);
-    }
+    },
+    'click #pass': function (e) {
+
+        addMove("pass");
+    },
+    'click #resign': function (e) {
+
+        addMove("resign");
+    },
 });
 
 Template.go.helpers({
@@ -50,6 +90,12 @@ Template.go.helpers({
     "gameId" : function() {
         if (Session.get("game")) {
             return Session.get("game")._id;
+        }
+    },
+
+    "gameState" : function() {
+        if (Session.get("game")) {
+            return Session.get("game").state;
         }
     },
 
@@ -72,10 +118,37 @@ Template.go.helpers({
         }
     },
 
+    "gameRunning" : function() {
+        if (Session.get("game")) {
+            var game = Session.get("game");
+            return game.state == "started" || game.state == "passed";
+        }
+    },
+
     "myColor" : function() {
         var color = myColor();
         if (color) {
           return color == WGo.B ? "Black" : "White";
+        }
+    },
+
+    "result" : function() {
+        if (Session.get("game").winner) {
+            if (Meteor.userId() == Session.get("game").winner)
+                return "You win";
+            else
+                return "You lose";
+        }
+    },
+
+    "winner" : function() {
+        if (Session.get("game")) {
+            return Session.get("game").winner;
+        }
+    },
+    "loser" : function() {
+        if (Session.get("game")) {
+            return Session.get("game").loser;
         }
     },
 
@@ -121,23 +194,7 @@ Template.board.rendered = function() {
 
 
     board.addEventListener("click", function(x, y) {
-
-        var turn = game.turn;
-
-        if (turn != myColor()) {
-            alert("Calm yer tits");
-            return;
-        }
-
-        var noplay = true;
-        var ret = game.play( x, y, turn, noplay );
-        console.log("Local move: (%s, %s, %s) -> %s", x, y, turn, ret);
-
-        if (ret === false) {
-            Meteor.call("play", Session.get("game")._id, x, y, turn);
-        } else {
-            alert("Invalid movement: " + invalidMoveReason2str(ret));
-        }
+        addMove("play", x, y);
     });
 
 
@@ -151,18 +208,31 @@ Template.board.rendered = function() {
             }
             lastMoveId = move._id;
 
-            var ret = game.play( move.x, move.y, move.turn );
-            console.log("Remote move: (%s, %s, %s) -> %s", move.x, move.y, move.turn, ret);
+            switch (move.type) {
+                case "move":
+                    var ret = game.play( move.x, move.y, move.turn );
+                    console.log("Remote move: (%s, %s, %s) -> %s", move.x, move.y, move.turn, ret);
 
-            if (ret.constructor == Array) {
+                    if (ret.constructor == Array) {
 
-                board.update({
-                    add: [ { x: move.x, y: move.y, c: move.turn } ],
-                    remove: ret
-                });
+                        board.update({
+                            add: [ { x: move.x, y: move.y, c: move.turn } ],
+                            remove: ret
+                        });
 
-            } else {
-                alert("Received invalid movement from server:" + invalidMoveReason2str(ret));
+                    } else {
+                        alert("Received invalid movement from server:" + invalidMoveReason2str(ret));
+                    }
+                    break;
+
+                case "pass":
+                    console.log("Remote pass");
+                    game.pass(move.turn);
+                    break;
+
+                case "resign":
+                    console.log("Remote resign");
+                    break;
             }
 
             updateGameInSession(game);

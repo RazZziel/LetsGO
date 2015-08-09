@@ -4,29 +4,42 @@
 			<div style="position:relative;">
 				{{>board}}
 
-				{{#if myOpponent}}
-				{{else}}
+				{{#unless gameRunning}}
 					<div class="overlay" id="boardOverlay">
 						<div class="message">
-							<h1>Game created</h1>
-							<div>Waiting for an opponent...</div>
-							<div><i>(insert small cute waiting thingie here)</i></div>
-							<br/>
-							<div>Share this link with a friend: <b><a href="{{gameUrl}}">{{gameUrl}}</a></b></div>
+							{{#if winner}}
+								<h1>Game finished</h1>
+								<div>{{result}}</div>
+								<div><a href="/">New game</a></div>
+							{{/if}}
+							{{#unless myOpponent}}
+								<h1>Game created</h1>
+								<div>Waiting for an opponent...</div>
+								<div><i>(insert small cute waiting thingie here)</i></div>
+								<br/>
+								<div>Share this link with a friend: <b><a href="{{gameUrl}}">{{gameUrl}}</a></b></div>
+							{{/unless}}
 						</div>
 					</div>
-				{{/if}}
+				{{/unless}}
 			</div>
 		</div>
 
 		<div class="col-md-3">
-			<div>Game: {{gameId}}</div>
+			<div>Game: {{gameId}} ({{gameState}})</div>
 			<div>You are {{me}} ({{myColor}})</div>
 
-			{{#if myOpponent}}
-				<div>Your opponent is {{myOpponent}}</div>
+			{{#if gameRunning}}
+				<div style="margin-top:1em;">
+					<div>Your opponent is {{myOpponent}}</div>
+					<div>Captured pieces: {{captureCountBlack}} black / {{captureCountWhite}} white</div>
+				</div>
+
 				<div>Turn: {{turn}}</div>
-				<div>Captured pieces: {{captureCountBlack}} black / {{captureCountWhite}} white</div>
+				<div style="margin-top:1em;">
+					<button id="pass">Pass</button>
+					<button id="resign">Resign</button>
+				</div>
 			{{/if}}
 		</div>
 	</div>
