@@ -198,6 +198,7 @@ Template.board.rendered = function() {
         addMove("play", x, y);
     });
 
+    var init = true;
 
     Moves.find({}).observe({
 
@@ -212,7 +213,8 @@ Template.board.rendered = function() {
             switch (move.type) {
                 case "move":
                     var ret = game.play( move.x, move.y, move.turn );
-                    console.log("Remote move: (%s, %s, %s) -> %s", move.x, move.y, move.turn, ret);
+                    if (!init)
+                        console.log("Remote move: (%s, %s, %s) -> %s", move.x, move.y, move.turn, ret);
 
                     if (ret.constructor == Array) {
 
@@ -222,7 +224,8 @@ Template.board.rendered = function() {
                         });
 
                     } else {
-                        alert("Received invalid movement from server:" + invalidMoveReason2str(ret));
+                        if (!init)
+                            console.warn("Received invalid movement from server:" + invalidMoveReason2str(ret));
                     }
                     break;
 
@@ -244,4 +247,5 @@ Template.board.rendered = function() {
         }
 
     });
+    init = false;
 }
