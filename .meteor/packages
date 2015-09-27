@@ -13,3 +13,7 @@ iron:router
 meteorhacks:fast-render
 meteorhacks:kadira
 sacha:spin
+accounts-facebook
+accounts-google
+accounts-twitter
+accounts-github
