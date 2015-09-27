@@ -260,6 +260,28 @@ Template.board.rendered = function() {
     });
     init = false;
 
+    var lastOutline;
+    board.addEventListener("mousemove", function(x, y) {
+        if (x<0 || y<0) return;
+        if (lastOutline && lastOutline.x == x && lastOutline.y == y) return;
+        if (game.turn != myColor()) return;
+
+        if (lastOutline)
+            board.removeObject(lastOutline);
+
+        var noplay = true;
+        var ret = game.play( x, y, game.turn, noplay );
+        if (ret === false) {
+            lastOutline = {x: x, y: y, type: WGo.Board.drawHandlers.outline, c: myColor()};
+        } else {
+            lastOutline = {x: x, y: y, type: WGo.Board.drawHandlers.MA};
+            // TODO: Do something with invalidMoveReason2str(ret)
+        }
+
+        board.addObject(lastOutline);
+    });
+}
+
 var stoneAudio = [];
 var loadAudioSamples = function() {
     var audioPath = 'https://a00ce0086bda2213e89f-570db0116da8eb5fdc3ce95006e46d28.ssl.cf1.rackcdn.com/4.2/sound/';
