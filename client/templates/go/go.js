@@ -198,6 +198,7 @@ Template.board.rendered = function() {
         addMove("play", x, y);
     });
 
+    loadAudioSamples();
     var init = true;
 
     Moves.find({}).observe({
@@ -222,6 +223,10 @@ Template.board.rendered = function() {
                             add: [ { x: move.x, y: move.y, c: move.turn } ],
                             remove: ret
                         });
+
+                        if (!init) {
+                            stoneAudio[ Math.round(Math.random()*(stoneAudio.length-1)) ].play();
+                        }
 
                     } else {
                         if (!init)
@@ -248,4 +253,27 @@ Template.board.rendered = function() {
 
     });
     init = false;
+
+var stoneAudio = [];
+var loadAudioSamples = function() {
+    var audioPath = 'https://a00ce0086bda2213e89f-570db0116da8eb5fdc3ce95006e46d28.ssl.cf1.rackcdn.com/4.2/sound/';
+    stoneAudio[0] = loadAudioSample(audioPath+'stone1');
+    stoneAudio[1] = loadAudioSample(audioPath+'stone2');
+    stoneAudio[2] = loadAudioSample(audioPath+'stone3');
+    stoneAudio[3] = loadAudioSample(audioPath+'stone4');
+    stoneAudio[4] = loadAudioSample(audioPath+'stone5');
+}
+
+var loadAudioSample = function(filename) {
+    var audio = new Audio();
+    var source = document.createElement('source');
+    if (audio.canPlayType('audio/mpeg;')) {
+        source.type = 'audio/mpeg';
+        source.src = filename+'.mp3';
+    } else {
+        source.type = 'audio/ogg';
+        source.src = filename+'.ogg';
+    }
+    audio.appendChild(source);
+    return audio;
 }
