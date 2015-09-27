@@ -84,7 +84,8 @@ Template.go.events({
 
 Template.go.helpers({
     "turn" : function() {
-        return Session.get("turnNumber") + " (" + (Session.get("turnColor") == WGo.B ? "Black" : "White") + ")";
+        //return Session.get("turnNumber") + " (" + (Session.get("turnColor") == WGo.B ? "Black" : "White") + ")";
+        return Session.get("turnColor") == myColor() ? "Your turn" : "Oppopent's turn";
     },
 
     "gameId" : function() {

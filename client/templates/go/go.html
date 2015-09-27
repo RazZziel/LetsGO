@@ -4,6 +4,12 @@
 			<div style="position:relative;">
 				{{>board}}
 
+				{{#if gameRunning}}
+					<div style="position: absolute; top:0; width:100%; text-align:center;">
+						<b>{{turn}}</b>
+					</div>
+				{{/if}}
+
 				{{#unless gameRunning}}
 					<div class="overlay" id="boardOverlay">
 						<div class="message">
@@ -35,7 +41,6 @@
 					<div>Captured pieces: {{captureCountBlack}} black / {{captureCountWhite}} white</div>
 				</div>
 
-				<div>Turn: {{turn}}</div>
 				<div style="margin-top:1em;">
 					<button id="pass">Pass</button>
 					<button id="resign">Resign</button>
