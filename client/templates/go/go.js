@@ -199,6 +199,7 @@ Template.board.rendered = function() {
     });
 
     loadAudioSamples();
+    var lastMove;
     var init = true;
 
     Moves.find({}).observe({
@@ -225,6 +226,11 @@ Template.board.rendered = function() {
                         });
 
                         if (!init) {
+                            if (lastMove)
+                                board.removeObject(lastMove);
+                            lastMove = {x: move.x, y: move.y, type: WGo.Board.drawHandlers.CR};
+                            board.addObject(lastMove);
+
                             stoneAudio[ Math.round(Math.random()*(stoneAudio.length-1)) ].play();
                         }
 
