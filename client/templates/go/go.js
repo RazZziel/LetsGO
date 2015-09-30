@@ -264,14 +264,13 @@ Template.board.rendered = function() {
     board.addEventListener("mousemove", function(x, y) {
         if (x<0 || y<0) return;
         if (lastOutline && lastOutline.x == x && lastOutline.y == y) return;
-        if (game.turn != myColor()) return;
 
         if (lastOutline)
             board.removeObject(lastOutline);
 
         var noplay = true;
         var ret = game.play( x, y, game.turn, noplay );
-        if (ret === false) {
+        if (ret === false && game.turn == myColor()) {
             lastOutline = {x: x, y: y, type: WGo.Board.drawHandlers.outline, c: myColor()};
         } else {
             lastOutline = {x: x, y: y, type: WGo.Board.drawHandlers.MA};
