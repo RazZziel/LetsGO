@@ -38,7 +38,7 @@
 			{{#if gameRunning}}
 				<div>Your opponent is {{myOpponent}}</div>
 				<div style="margin-top:1em;">
-					<div>Captured pieces: {{captureCountBlack}} black / {{captureCountWhite}} white</div>
+					{{> score}}
 				</div>
 
 				<div style="margin-top:1em;">
@@ -52,4 +52,14 @@
 
 <template name="board">
 	<div id="board" style="position:relative;"></div>
+</template>
+
+<template name="score">
+	<div class="checkbox">
+		<label>
+			<input type="checkbox" id="showScore"/>
+			Show territories
+		</label>
+	</div>
+	<div id="scoreMode"></div>
 </template>

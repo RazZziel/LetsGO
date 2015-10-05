@@ -3,8 +3,6 @@
 var updateGameInSession = function(game) {
     Session.set("turnColor", game.turn);
     Session.set("turnNumber", game.stack ? game.stack.length : 0);
-    Session.set("captureCountBlack", game.getCaptureCount(WGo.B));
-    Session.set("captureCountWhite", game.getCaptureCount(WGo.W));
 }
 
 var invalidMoveReason2str = function(reason) {
@@ -18,8 +16,10 @@ var invalidMoveReason2str = function(reason) {
 }
 
 var game = new WGo.Game(19);
-updateGameInSession(game);
+var board;
+var scoreMode;
 
+updateGameInSession(game);
 var lastMoveId = undefined;
 
 
@@ -152,13 +152,6 @@ Template.go.helpers({
             return Session.get("game").loser;
         }
     },
-
-    "captureCountBlack": function() {
-        return Session.get("captureCountWhite");
-    },
-    "captureCountWhite": function() {
-        return Session.get("captureCountBlack");
-    }
 })
 
 Template.go.rendered = function() {
@@ -183,12 +176,14 @@ Template.board.rendered = function() {
 
     var board_element = document.getElementById("board");
     var board_overlay = document.getElementById("boardOverlay");
-    var board = new WGo.Board(board_element);
+    board = new WGo.Board(board_element);
 
     var resizeBoard = function() {
         board.setWidth(Math.min(board_element.offsetWidth, window.innerHeight));
-        board_overlay.style.width = board.width+"px";
-        board_overlay.style.height = board.height+"px";
+        if (board_overlay) {
+            board_overlay.style.width = board.width+"px";
+            board_overlay.style.height = board.height+"px";
+        }
     };
     resizeBoard();
     window.addEventListener("resize", resizeBoard);
@@ -231,6 +226,8 @@ Template.board.rendered = function() {
                             lastMove = {x: move.x, y: move.y, type: WGo.Board.drawHandlers.CR};
                             board.addObject(lastMove);
 
+                            updateScoreMode();
+
                             stoneAudio[ Math.round(Math.random()*(stoneAudio.length-1)) ].play();
                         }
 
@@ -260,13 +257,19 @@ Template.board.rendered = function() {
     });
     init = false;
 
+    updateScoreMode();
+
     var lastOutline;
     board.addEventListener("mousemove", function(x, y) {
-        if (x<0 || y<0) return;
-        if (lastOutline && lastOutline.x == x && lastOutline.y == y) return;
 
-        if (lastOutline)
+        if (lastOutline) {
+
+            if (lastOutline.x == x && lastOutline.y == y) return;
+
             board.removeObject(lastOutline);
+        }
+
+        if (x<0 || y<0) return;
 
         var noplay = true;
         var ret = game.play( x, y, game.turn, noplay );
@@ -279,6 +282,66 @@ Template.board.rendered = function() {
 
         board.addObject(lastOutline);
     });
+    board.addEventListener("mouseleave", function(x, y) {
+
+        if (lastOutline)
+            board.removeObject(lastOutline);
+    });
+}
+
+Template.score.rendered = function() {
+
+    $(document.getElementById("showScore")).change(updateScoreMode);
+    updateScoreMode();
+}
+
+var updateScoreMode = function(enabled) {
+    var checkbox = document.getElementById("showScore");
+    if (checkbox && game && board) {
+
+        if (!scoreMode) {
+            var komi = 0;
+            scoreMode = new WGo.ScoreMode(game.position, board, komi, drawScore);
+        } else {
+            scoreMode.originalPosition = game.position;
+            scoreMode.position = game.position.clone();
+        }
+
+        scoreMode.calculate();
+        scoreMode.displayScore(checkbox.checked);
+    }
+}
+
+var drawScore = function(scoreMode, score) {
+
+    var sb = score.black.length+
+            score.white_captured.length+
+            scoreMode.originalPosition.capCount.black;
+    var sw = score.white.length+
+            score.black_captured.length+
+            scoreMode.originalPosition.capCount.white+
+            parseFloat(scoreMode.komi);
+
+    var msg = "<p>";
+    msg +=
+        WGo.t("black")+": "+
+        score.black.length+" + "+
+        (score.white_captured.length+scoreMode.originalPosition.capCount.black)+" = "+
+        sb+"</br>";
+    msg += WGo.t("white")+": "+
+        score.white.length+" + "+
+        (score.black_captured.length+scoreMode.originalPosition.capCount.white)+" + "+
+        scoreMode.komi+" = "+
+        sw+"</p>";
+    msg += "<p style='font-weight: bold;'>"+
+        (sb > sw
+            ? WGo.t("bwin", sb-sw)
+            : WGo.t("wwin", sw-sb))+
+        "</p>";
+
+    var scoreMode_element = document.getElementById("scoreMode");
+    if (scoreMode_element)
+        scoreMode_element.innerHTML = msg;
 }
 
 var stoneAudio = [];
