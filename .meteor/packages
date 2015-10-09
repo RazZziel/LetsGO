@@ -15,7 +15,7 @@ accounts-facebook
 accounts-google
 accounts-twitter
 accounts-github
-artwells:accounts-guest@=0.1.12
+artwells:accounts-guest
 standard-minifiers
 meteor-base
 mobile-experience
@@ -30,3 +30,4 @@ random
 ejson
 spacebars
 check
+accounts-password
