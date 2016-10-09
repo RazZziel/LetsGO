@@ -14,7 +14,7 @@ Let's GO is a casual, multi-player (no AI) game of go/baduk/wéiqí, like a dumb
  * Share link on Facebook, Twitter, G+, etc
 * First person to open the link becomes P2
 
-## Ranked game
+## Ranked game (not implemented yet)
 
 * P1 clicks "Search game"
 * P1 logs in or registers
