@@ -1,4 +1,8 @@
-# UX
+# Let's GO
+
+Let's GO is a casual, multi-player (no AI) game of go/baduk/wéiqí, like a dumbed-down [OGS](https://online-go.com), developed merely as a [Meteor](https://www.meteor.com/) testing exercise.
+
+# Use cases
 
 ## Casual game
 
